@@ -1,0 +1,19 @@
+[package]
+name = "grex_terminal_display"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+crossterm = "0.27.0"
+
+[dependencies.bevy]
+version = "0.13"
+features = ["dynamic_linking"]
+
+[dependencies.grex_framebuffer_extract]
+git = "https://github.com/exvacuum/grex_framebuffer_extract"
+tag = "v0.1.0"
+
+[dependencies.grex_dither_post_process]
+git = "https://github.com/exvacuum/grex_dither_post_process"
+tag = "v0.1.2"
