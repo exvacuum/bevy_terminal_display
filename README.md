@@ -10,11 +10,9 @@ Features Include:
 - Post-process dithers colors to pure black and white, which are then printed as braille characters to the terminal
 - Responsiveness to terminal window resizing
 - `TerminalInput` resource which keeps track of pressed & released keys
-- Keyboard input enhancements using kitty protocol
-
-Future Goals:
-- Find a way to integrate into a TUI library like ratatui for more interaction options.
-- Move kitty enhancements to a feature maybe
+- `TerminalUI` resource for rendering ratatui TUI widgets
+- `TerminalWidget` trait for creating custom TUI widget components
+- Logging redirected to `output.log`
 
 ## Screenshots
 ![](./doc/screenshot.png)
@@ -42,7 +40,7 @@ use grex_terminal_display;
 fn main() {
     App::new()
         .add_plugins((
-            DefaultPlugins.build().disable::<WinitPlugin>(),
+            DefaultPlugins.build().disable::<WinitPlugin>().disable::<LogPlugin>,
             ScheduleRunnerPlugin::run_loop(Duration::from_secs_f32(1.0 / 60.0)),
             grex_terminal_display::TerminalDisplayPlugin,
         ))

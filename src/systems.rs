@@ -1,25 +1,20 @@
-use std::{
-    io::{stdout, Write},
-    usize,
-};
-
 use bevy::{
     prelude::*,
     render::render_resource::{Extent3d, TextureFormat},
 };
-use crossterm::{
-    cursor::{self, MoveTo},
-    event::{read, Event, KeyEventKind, KeyboardEnhancementFlags, PushKeyboardEnhancementFlags},
-    terminal::enable_raw_mode,
-    ExecutableCommand, QueueableCommand,
-};
+use crossterm::event::{read, Event, KeyEventKind};
 use grex_framebuffer_extract::{
     components::FramebufferExtractDestination, render_assets::FramebufferExtractSource,
 };
 
 use crate::{
     events::TerminalInputEvent,
-    resources::{EventQueue, TerminalInput},
+    resources::{EventQueue, Terminal, TerminalInput, TerminalUI},
+};
+
+use ratatui::{
+    prelude::*,
+    widgets::{Paragraph, Wrap},
 };
 
 const BRAILLE_CODE_MIN: u16 = 0x2800;
@@ -41,16 +36,13 @@ pub fn setup(event_queue: Res<EventQueue>) {
             }
         }
     });
-
-    let mut stdout = stdout();
-    enable_raw_mode().expect("Failed to put terminal into raw mode");
-    let _ = stdout.execute(PushKeyboardEnhancementFlags(
-        KeyboardEnhancementFlags::REPORT_EVENT_TYPES,
-    ));
-    let _ = stdout.execute(cursor::Hide);
 }
 
-pub fn print_to_terminal(image_exports: Query<&FramebufferExtractDestination>) {
+pub fn print_to_terminal(
+    mut terminal: ResMut<Terminal>,
+    mut terminal_ui: ResMut<TerminalUI>,
+    image_exports: Query<&FramebufferExtractDestination>,
+) {
     for image_export in image_exports.iter() {
         let mut image = image_export
             .0
@@ -93,10 +85,22 @@ pub fn print_to_terminal(image_exports: Query<&FramebufferExtractDestination>) {
         }
 
         let string = output_buffer.into_iter().collect::<String>();
-        let mut stdout = stdout();
-        stdout.queue(MoveTo(0, 0)).unwrap();
-        stdout.write_all(string.as_bytes()).unwrap();
-        stdout.flush().unwrap();
+        terminal
+            .0
+            .draw(|frame| {
+                let area = frame.size();
+                frame.render_widget(
+                    Paragraph::new(string)
+                        .white()
+                        .bold()
+                        .wrap(Wrap { trim: true }),
+                    area,
+                );
+                for widget in terminal_ui.widgets().iter_mut() {
+                    widget.render(frame, area);
+                }
+            })
+            .expect("Failed to draw terminal frame");
     }
 }
 
@@ -109,6 +113,17 @@ fn braille_char(mask: u8) -> char {
             character
         }
         None => panic!("Error converting character!"),
+    }
+}
+
+pub fn widget_input_handling(
+    mut terminal_ui: ResMut<TerminalUI>,
+    mut event_reader: EventReader<TerminalInputEvent>,
+) {
+    for event in event_reader.read() {
+        for widget in terminal_ui.widgets().iter_mut() {
+            widget.handle_events(event);
+        }
     }
 }
 
