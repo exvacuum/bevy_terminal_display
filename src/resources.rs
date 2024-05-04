@@ -1,7 +1,7 @@
 use std::{sync::{Arc, Mutex}, io::{stdout, Stdout}, fs::{File, OpenOptions}};
 
 use bevy::{prelude::*, utils::{HashSet, Uuid, HashMap, tracing::{subscriber, level_filters::LevelFilter}}, log::tracing_subscriber};
-use crossterm::{event::{Event, KeyCode, EnableMouseCapture}, terminal::{EnterAlternateScreen, enable_raw_mode}, ExecutableCommand};
+use crossterm::{event::{Event, KeyCode, EnableMouseCapture, PushKeyboardEnhancementFlags, KeyboardEnhancementFlags}, terminal::{EnterAlternateScreen, enable_raw_mode}, ExecutableCommand};
 use ratatui::{backend::CrosstermBackend, Frame, layout::Rect};
 
 use crate::events::TerminalInputEvent;
@@ -47,6 +47,7 @@ impl Default for Terminal {
     fn default() -> Self {
         stdout().execute(EnterAlternateScreen).unwrap();
         stdout().execute(EnableMouseCapture).unwrap();
+        stdout().execute(PushKeyboardEnhancementFlags(KeyboardEnhancementFlags::REPORT_EVENT_TYPES)).unwrap();
         enable_raw_mode().unwrap();
         let mut terminal = ratatui::Terminal::new(CrosstermBackend::new(stdout())).expect("Failed to create terminal");
         terminal.clear().expect("Failed to clear terminal");
@@ -85,6 +86,6 @@ pub trait TerminalWidget {
     fn init(&mut self) {}
     fn update(&mut self) {}
     fn render(&mut self, frame: &mut Frame, rect: Rect);
-    fn handle_events(&mut self, _event: &TerminalInputEvent) {}
+    fn handle_events(&mut self, _event: &TerminalInputEvent, commands: &mut Commands) {}
     fn depth(&self) -> u32 { 0 }
 }

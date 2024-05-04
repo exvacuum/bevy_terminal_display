@@ -119,10 +119,11 @@ fn braille_char(mask: u8) -> char {
 pub fn widget_input_handling(
     mut terminal_ui: ResMut<TerminalUI>,
     mut event_reader: EventReader<TerminalInputEvent>,
+    mut commands: Commands,
 ) {
     for event in event_reader.read() {
         for widget in terminal_ui.widgets().iter_mut() {
-            widget.handle_events(event);
+            widget.handle_events(event, &mut commands);
         }
     }
 }

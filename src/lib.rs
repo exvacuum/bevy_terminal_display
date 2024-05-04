@@ -8,7 +8,7 @@ use bevy::{
     prelude::*, utils::tracing::level_filters::LevelFilter,
 };
 use crossterm::{
-    event::DisableMouseCapture,
+    event::{DisableMouseCapture, PopKeyboardEnhancementFlags},
     terminal::{disable_raw_mode, LeaveAlternateScreen},
     ExecutableCommand,
 };
@@ -66,6 +66,7 @@ impl Plugin for TerminalDisplayPlugin {
 impl Drop for TerminalDisplayPlugin {
     fn drop(&mut self) {
         let mut stdout = stdout();
+        let _ = stdout.execute(PopKeyboardEnhancementFlags);
         let _ = stdout.execute(DisableMouseCapture);
         let _ = stdout.execute(LeaveAlternateScreen);
         let _ = disable_raw_mode();
