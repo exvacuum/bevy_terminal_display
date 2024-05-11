@@ -1,8 +1,20 @@
-use std::{sync::{Arc, Mutex}, io::{stdout, Stdout}, fs::{File, OpenOptions}};
+use std::{
+    io::{stdout, Stdout},
+    sync::{Arc, Mutex},
+};
 
-use bevy::{prelude::*, utils::{HashSet, Uuid, HashMap, tracing::{subscriber, level_filters::LevelFilter}}, log::tracing_subscriber};
-use crossterm::{event::{Event, KeyCode, EnableMouseCapture, PushKeyboardEnhancementFlags, KeyboardEnhancementFlags}, terminal::{EnterAlternateScreen, enable_raw_mode}, ExecutableCommand};
-use ratatui::{backend::CrosstermBackend, Frame, layout::Rect};
+use bevy::{
+    prelude::*,
+    utils::{HashMap, HashSet, Uuid},
+};
+use crossterm::{
+    event::{
+        EnableMouseCapture, Event, KeyCode, KeyboardEnhancementFlags, PushKeyboardEnhancementFlags,
+    },
+    terminal::{enable_raw_mode, EnterAlternateScreen},
+    ExecutableCommand,
+};
+use ratatui::{backend::CrosstermBackend, layout::Rect, Frame};
 
 use crate::events::TerminalInputEvent;
 
@@ -47,9 +59,14 @@ impl Default for Terminal {
     fn default() -> Self {
         stdout().execute(EnterAlternateScreen).unwrap();
         stdout().execute(EnableMouseCapture).unwrap();
-        stdout().execute(PushKeyboardEnhancementFlags(KeyboardEnhancementFlags::REPORT_EVENT_TYPES)).unwrap();
+        stdout()
+            .execute(PushKeyboardEnhancementFlags(
+                KeyboardEnhancementFlags::REPORT_EVENT_TYPES,
+            ))
+            .unwrap();
         enable_raw_mode().unwrap();
-        let mut terminal = ratatui::Terminal::new(CrosstermBackend::new(stdout())).expect("Failed to create terminal");
+        let mut terminal = ratatui::Terminal::new(CrosstermBackend::new(stdout()))
+            .expect("Failed to create terminal");
         terminal.clear().expect("Failed to clear terminal");
         Self(terminal)
     }
@@ -57,7 +74,7 @@ impl Default for Terminal {
 
 #[derive(Resource, Default)]
 pub struct TerminalUI {
-    widgets: HashMap<Uuid, Box<dyn TerminalWidget + Sync + Send>>
+    widgets: HashMap<Uuid, Box<dyn TerminalWidget + Sync + Send>>,
 }
 
 impl TerminalUI {
@@ -77,7 +94,7 @@ impl TerminalUI {
 
     pub fn widgets(&mut self) -> Vec<&mut Box<dyn TerminalWidget + Sync + Send>> {
         let mut vec = self.widgets.values_mut().collect::<Vec<_>>();
-        vec.sort_by(|a, b| { a.depth().cmp(&b.depth()).reverse() });
+        vec.sort_by(|a, b| a.depth().cmp(&b.depth()).reverse());
         vec
     }
 }
@@ -86,6 +103,8 @@ pub trait TerminalWidget {
     fn init(&mut self) {}
     fn update(&mut self) {}
     fn render(&mut self, frame: &mut Frame, rect: Rect);
-    fn handle_events(&mut self, _event: &TerminalInputEvent, commands: &mut Commands) {}
-    fn depth(&self) -> u32 { 0 }
+    fn handle_events(&mut self, _event: &TerminalInputEvent, _commands: &mut Commands) {}
+    fn depth(&self) -> u32 {
+        0
+    }
 }

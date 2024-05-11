@@ -35,6 +35,7 @@ impl Plugin for TerminalDisplayPlugin {
                     let log_file = OpenOptions::new()
                         .write(true)
                         .create(true)
+                        .truncate(true)
                         .open("debug.log")
                         .unwrap();
                     let file_layer = tracing_subscriber::fmt::Layer::new()

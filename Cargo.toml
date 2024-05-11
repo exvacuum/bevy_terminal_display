@@ -1,6 +1,6 @@
 [package]
 name = "grex_terminal_display"
-version = "0.1.2"
+version = "0.1.3"
 edition = "2021"
 
 [dependencies]
@@ -8,7 +8,6 @@ crossterm = "0.27.0"
 
 [dependencies.bevy]
 version = "0.13"
-features = ["dynamic_linking"]
 
 [dependencies.grex_framebuffer_extract]
 git = "https://github.com/exvacuum/grex_framebuffer_extract"
