@@ -1,11 +1,10 @@
 use std::{
-    io::{stdout, Stdout},
-    sync::{Arc, Mutex},
+    any::Any, io::{stdout, Stdout}, sync::{Arc, Mutex}
 };
 
 use bevy::{
     prelude::*,
-    utils::{HashMap, HashSet, Uuid},
+    utils::HashSet,
 };
 use crossterm::{
     event::{
@@ -72,34 +71,34 @@ impl Default for Terminal {
     }
 }
 
-#[derive(Resource, Default)]
-pub struct TerminalUI {
-    widgets: HashMap<Uuid, Box<dyn TerminalWidget + Sync + Send>>,
-}
+// #[derive(Resource, Default)]
+// pub struct TerminalUI {
+//     widgets: HashMap<Uuid, Box<dyn TerminalWidget + Sync + Send>>,
+// }
+//
+// impl TerminalUI {
+//     pub fn insert_widget(&mut self, widget: Box<dyn TerminalWidget + Sync + Send>) -> Uuid {
+//         let id = Uuid::new_v4();
+//         self.widgets.insert(id, widget);
+//         id
+//     }
+//
+//     pub fn get_widget(&mut self, id: Uuid) -> Option<&mut Box<dyn TerminalWidget + Sync + Send>> {
+//         self.widgets.get_mut(&id)
+//     }
+//
+//     pub fn destroy_widget(&mut self, id: Uuid) {
+//         self.widgets.remove(&id);
+//     }
+//
+//     pub fn widgets(&mut self) -> Vec<&mut Box<dyn TerminalWidget + Sync + Send>> {
+//         let mut vec = self.widgets.values_mut().collect::<Vec<_>>();
+//         vec.sort_by(|a, b| a.depth().cmp(&b.depth()).reverse());
+//         vec
+//     }
+// }
 
-impl TerminalUI {
-    pub fn insert_widget(&mut self, widget: Box<dyn TerminalWidget + Sync + Send>) -> Uuid {
-        let id = Uuid::new_v4();
-        self.widgets.insert(id, widget);
-        id
-    }
-
-    pub fn get_widget(&mut self, id: Uuid) -> Option<&mut Box<dyn TerminalWidget + Sync + Send>> {
-        self.widgets.get_mut(&id)
-    }
-
-    pub fn destroy_widget(&mut self, id: Uuid) {
-        self.widgets.remove(&id);
-    }
-
-    pub fn widgets(&mut self) -> Vec<&mut Box<dyn TerminalWidget + Sync + Send>> {
-        let mut vec = self.widgets.values_mut().collect::<Vec<_>>();
-        vec.sort_by(|a, b| a.depth().cmp(&b.depth()).reverse());
-        vec
-    }
-}
-
-pub trait TerminalWidget {
+pub trait TerminalWidget: Any {
     fn init(&mut self) {}
     fn update(&mut self) {}
     fn render(&mut self, frame: &mut Frame, rect: Rect);

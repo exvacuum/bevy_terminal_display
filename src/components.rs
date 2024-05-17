@@ -11,6 +11,8 @@ use grex_framebuffer_extract::{
     render_assets::FramebufferExtractSource,
 };
 
+use crate::resources::TerminalWidget;
+
 #[derive(Component)]
 pub struct TerminalDisplay;
 
@@ -72,3 +74,12 @@ impl TerminalDisplayBundle {
     }
 }
 
+#[derive(Component)]
+pub struct Widget {
+    pub widget: Box<dyn TerminalWidget + Send + Sync>,
+    pub depth: u32,
+    pub enabled: bool,
+}
+
+#[derive(Component)]
+pub struct Tooltip(pub String);

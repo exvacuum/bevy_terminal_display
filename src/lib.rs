@@ -1,4 +1,4 @@
-use std::{io::stdout, fs::OpenOptions};
+use std::{fs::OpenOptions, io::stdout, path::PathBuf, sync::{Arc, Mutex}};
 
 use bevy::{
     log::{
@@ -16,6 +16,7 @@ use grex_dither_post_process::DitherPostProcessPlugin;
 use grex_framebuffer_extract::FramebufferExtractPlugin;
 
 pub use crossterm;
+use once_cell::sync::Lazy;
 pub use ratatui;
 
 pub mod components;
@@ -23,10 +24,23 @@ pub mod events;
 pub mod resources;
 mod systems;
 
-pub struct TerminalDisplayPlugin;
+static LOG_PATH: Lazy<Arc<Mutex<PathBuf>>> = Lazy::new(|| Arc::new(Mutex::new(PathBuf::default())));
+
+pub struct TerminalDisplayPlugin {
+    pub log_path: PathBuf,
+}
+
+impl Default for TerminalDisplayPlugin {
+    fn default() -> Self {
+        Self {
+            log_path: "debug.log".into()
+        }
+    }
+}
 
 impl Plugin for TerminalDisplayPlugin {
     fn build(&self, app: &mut App) {
+        *LOG_PATH.lock().expect("Failed to get lock on log path mutex") = self.log_path.clone();
         app.add_plugins((
             DitherPostProcessPlugin,
             FramebufferExtractPlugin,
@@ -36,7 +50,7 @@ impl Plugin for TerminalDisplayPlugin {
                         .write(true)
                         .create(true)
                         .truncate(true)
-                        .open("debug.log")
+                        .open(LOG_PATH.lock().expect("Failed to get lock on log path mutex").clone())
                         .unwrap();
                     let file_layer = tracing_subscriber::fmt::Layer::new()
                         .with_writer(log_file)
@@ -59,7 +73,6 @@ impl Plugin for TerminalDisplayPlugin {
         .insert_resource(resources::Terminal::default())
         .insert_resource(resources::EventQueue::default())
         .insert_resource(resources::TerminalInput::default())
-        .insert_resource(resources::TerminalUI::default())
         .add_event::<events::TerminalInputEvent>();
     }
 }

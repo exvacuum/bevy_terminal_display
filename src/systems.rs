@@ -8,8 +8,7 @@ use grex_framebuffer_extract::{
 };
 
 use crate::{
-    events::TerminalInputEvent,
-    resources::{EventQueue, Terminal, TerminalInput, TerminalUI},
+    components::Widget, events::TerminalInputEvent, resources::{EventQueue, Terminal, TerminalInput}
 };
 
 use ratatui::{
@@ -40,7 +39,7 @@ pub fn setup(event_queue: Res<EventQueue>) {
 
 pub fn print_to_terminal(
     mut terminal: ResMut<Terminal>,
-    mut terminal_ui: ResMut<TerminalUI>,
+    mut widgets: Query<&mut Widget>,
     image_exports: Query<&FramebufferExtractDestination>,
 ) {
     for image_export in image_exports.iter() {
@@ -96,8 +95,10 @@ pub fn print_to_terminal(
                         .wrap(Wrap { trim: true }),
                     area,
                 );
-                for widget in terminal_ui.widgets().iter_mut() {
-                    widget.render(frame, area);
+                let mut active_widgets = widgets.iter_mut().filter(|widget| widget.enabled).collect::<Vec<_>>();
+                active_widgets.sort_by(|a, b| a.depth.cmp(&b.depth));
+                for mut widget in active_widgets {
+                    widget.widget.render(frame, area);
                 }
             })
             .expect("Failed to draw terminal frame");
@@ -117,13 +118,13 @@ fn braille_char(mask: u8) -> char {
 }
 
 pub fn widget_input_handling(
-    mut terminal_ui: ResMut<TerminalUI>,
+    mut widgets: Query<&mut Widget>,
     mut event_reader: EventReader<TerminalInputEvent>,
     mut commands: Commands,
 ) {
     for event in event_reader.read() {
-        for widget in terminal_ui.widgets().iter_mut() {
-            widget.handle_events(event, &mut commands);
+        for mut widget in widgets.iter_mut().filter(|widget| widget.enabled) {
+            widget.widget.handle_events(event, &mut commands);
         }
     }
 }
