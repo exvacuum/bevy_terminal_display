@@ -1,21 +1,13 @@
+use bevy::{prelude::*, render::render_resource::{Extent3d, TextureDescriptor, TextureDimension, TextureFormat, TextureUsages}};
+use bevy_dither_post_process::components::DitherPostProcessSettings;
+use bevy_framebuffer_extract::{components::{ExtractFramebufferBundle, FramebufferExtractDestination}, render_assets::FramebufferExtractSource};
 
-use bevy::{
-    prelude::*,
-    render::render_resource::{
-        Extent3d, TextureDescriptor, TextureDimension, TextureFormat, TextureUsages,
-    },
-};
-use grex_dither_post_process::components::DitherPostProcessSettings;
-use grex_framebuffer_extract::{
-    components::{ExtractFramebufferBundle, FramebufferExtractDestination},
-    render_assets::FramebufferExtractSource,
-};
-
-use crate::resources::TerminalWidget;
-
+/// Marker component for terminal display
 #[derive(Component)]
 pub struct TerminalDisplay;
 
+/// Bundle for terminal display, contains a handle to an image to be used as a render target to
+/// render to the terminal
 #[derive(Bundle)]
 pub struct TerminalDisplayBundle {
     _terminal_display: TerminalDisplay,
@@ -25,6 +17,9 @@ pub struct TerminalDisplayBundle {
 }
 
 impl TerminalDisplayBundle {
+    /// Create a new terminal display with the given dither level. A higher level exponentially
+    /// increases the size of the bayer matrix used in the ordered dithering calculations. If in
+    /// doubt, 3 is a good starting value to test with.
     pub fn new(dither_level: u32, asset_server: &AssetServer) -> Self {
         let terminal_size = crossterm::terminal::size().unwrap();
         let size = Extent3d {
@@ -69,17 +64,9 @@ impl TerminalDisplayBundle {
         }
     }
 
+    /// Retrieves the handle to this display's target image. Anything written here will be
+    /// displayed.
     pub fn image_handle(&self) -> Handle<Image> {
         self.image_handle.clone()
     }
 }
-
-#[derive(Component)]
-pub struct Widget {
-    pub widget: Box<dyn TerminalWidget + Send + Sync>,
-    pub depth: u32,
-    pub enabled: bool,
-}
-
-#[derive(Component)]
-pub struct Tooltip(pub String);

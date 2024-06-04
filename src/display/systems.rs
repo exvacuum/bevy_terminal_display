@@ -2,44 +2,31 @@ use bevy::{
     prelude::*,
     render::render_resource::{Extent3d, TextureFormat},
 };
-use crossterm::event::{read, Event, KeyEventKind};
-use grex_framebuffer_extract::{
+use crossterm::event::Event;
+use bevy_framebuffer_extract::{
     components::FramebufferExtractDestination, render_assets::FramebufferExtractSource,
 };
-
-use crate::{
-    components::Widget, events::TerminalInputEvent, resources::{EventQueue, Terminal, TerminalInput}
-};
-
 use ratatui::{
-    prelude::*,
+    style::Stylize,
     widgets::{Paragraph, Wrap},
 };
 
+use crate::input::events::TerminalInputEvent;
+
+use super::resources::Terminal;
+
 const BRAILLE_CODE_MIN: u16 = 0x2800;
 const BRAILLE_CODE_MAX: u16 = 0x28FF;
+
+/// 0 3
+/// 1 4
+/// 2 5
+/// 6 7
 const BRAILLE_DOT_BIT_POSITIONS: [u8; 8] = [0, 1, 2, 6, 3, 4, 5, 7];
 
-pub fn setup(event_queue: Res<EventQueue>) {
-    let event_queue = event_queue.0.clone();
-    std::thread::spawn(move || {
-        loop {
-            // `read()` blocks until an `Event` is available
-            match read() {
-                Ok(event) => {
-                    event_queue.lock().unwrap().push(event);
-                }
-                Err(err) => {
-                    panic!("Error reading input events: {:?}", err);
-                }
-            }
-        }
-    });
-}
-
+/// Prints out the contents of a render image to the terminal as braille characters
 pub fn print_to_terminal(
     mut terminal: ResMut<Terminal>,
-    mut widgets: Query<&mut Widget>,
     image_exports: Query<&FramebufferExtractDestination>,
 ) {
     for image_export in image_exports.iter() {
@@ -47,10 +34,6 @@ pub fn print_to_terminal(
             .0
             .lock()
             .expect("Failed to get lock on output texture");
-        //TODO: Find a better way of preventing first frame
-        if image.size() == UVec2::ONE {
-            continue;
-        }
         if image.texture_descriptor.format != TextureFormat::R8Unorm {
             warn_once!("Extracted framebuffer texture is not R8Unorm format. Will attempt conversion, but consider changing your render texture's format.");
             info_once!("{:?}", image);
@@ -87,24 +70,19 @@ pub fn print_to_terminal(
         terminal
             .0
             .draw(|frame| {
-                let area = frame.size();
                 frame.render_widget(
                     Paragraph::new(string)
                         .white()
                         .bold()
                         .wrap(Wrap { trim: true }),
-                    area,
+                    frame.size(),
                 );
-                let mut active_widgets = widgets.iter_mut().filter(|widget| widget.enabled).collect::<Vec<_>>();
-                active_widgets.sort_by(|a, b| a.depth.cmp(&b.depth));
-                for mut widget in active_widgets {
-                    widget.widget.render(frame, area);
-                }
             })
             .expect("Failed to draw terminal frame");
     }
 }
 
+/// Utility function to convert a u8 into the corresponding braille character
 fn braille_char(mask: u8) -> char {
     match char::from_u32((BRAILLE_CODE_MIN + mask as u16) as u32) {
         Some(character) => {
@@ -117,40 +95,7 @@ fn braille_char(mask: u8) -> char {
     }
 }
 
-pub fn widget_input_handling(
-    mut widgets: Query<&mut Widget>,
-    mut event_reader: EventReader<TerminalInputEvent>,
-    mut commands: Commands,
-) {
-    for event in event_reader.read() {
-        for mut widget in widgets.iter_mut().filter(|widget| widget.enabled) {
-            widget.widget.handle_events(event, &mut commands);
-        }
-    }
-}
-
-pub fn input_handling(
-    event_queue: Res<EventQueue>,
-    mut input: ResMut<TerminalInput>,
-    mut event_writer: EventWriter<TerminalInputEvent>,
-) {
-    let mut event_queue = event_queue.0.lock().unwrap();
-    while let Some(event) = event_queue.pop() {
-        if let Event::Key(event) = event {
-            match event.kind {
-                KeyEventKind::Press => {
-                    input.press(event.code);
-                }
-                KeyEventKind::Release => {
-                    input.release(event.code);
-                }
-                _ => (),
-            }
-        }
-        event_writer.send(TerminalInputEvent(event));
-    }
-}
-
+/// Watches for terminal resize events and resizes the render image accordingly
 pub fn resize_handling(
     mut images: ResMut<Assets<Image>>,
     mut sources: ResMut<Assets<FramebufferExtractSource>>,

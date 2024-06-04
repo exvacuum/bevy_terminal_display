@@ -1,4 +1,4 @@
-# grex_terminal_display
+# bevy_terminal_display
 
 
 A (very experimental) plugin for the [Bevy](https://bevyengine.org) engine which allows for rendering to a terminal window.
@@ -10,7 +10,7 @@ Features Include:
 - Post-process dithers colors to pure black and white, which are then printed as braille characters to the terminal
 - Responsiveness to terminal window resizing
 - `TerminalInput` resource which keeps track of pressed & released keys
-- `TerminalUI` resource for rendering ratatui TUI widgets
+- `Widget` component for rendering ratatui TUI widgets
 - `TerminalWidget` trait for creating custom TUI widget components
 - Logging redirected to `output.log`
 
@@ -20,14 +20,14 @@ Features Include:
 
 | Crate Version | Bevy Version |
 |---            |---           |
-| 0.1           | 0.13         |
+| 0.2           | 0.13         |
 
 ## Installation
 
 ### Using git URL in Cargo.toml
 ```toml
-[dependencies.grex_terminal_display]
-git = "https://github.com/exvacuum/grex_terminal_display.git"
+[dependencies.bevy_terminal_display]
+git = "https://github.com/exvacuum/bevy_terminal_display.git"
 ```
 
 ## Example Usage
@@ -35,14 +35,14 @@ git = "https://github.com/exvacuum/grex_terminal_display.git"
 In `main.rs`:
 ```rs
 use bevy::prelude::*;
-use grex_terminal_display;
+use bevy_terminal_display;
 
 fn main() {
     App::new()
         .add_plugins((
             DefaultPlugins.build().disable::<WinitPlugin>().disable::<LogPlugin>,
             ScheduleRunnerPlugin::run_loop(Duration::from_secs_f32(1.0 / 60.0)),
-            grex_terminal_display::TerminalDisplayPlugin,
+            bevy_terminal_display::TerminalDisplayPlugin,
         ))
         .insert_resource(Msaa::Off) // For post-process
         .run();
@@ -51,7 +51,7 @@ fn main() {
 
 When spawning a camera:
 ```rs
-let terminal_display_bundle = grex_terminal_display::components::TerminalDisplayBundle::new(3, &asset_server);
+let terminal_display_bundle = bevy_terminal_display::display::components::TerminalDisplayBundle::new(3, &asset_server);
 
 commands.spawn((
     Camera3dBundle {

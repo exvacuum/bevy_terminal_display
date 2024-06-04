@@ -1,46 +1,58 @@
-use std::{fs::OpenOptions, io::stdout, path::PathBuf, sync::{Arc, Mutex}};
+#![warn(missing_docs)]
+
+//! Bevy plugin which allows a camera to render to a terminal window.
+
+use std::{
+    fs::OpenOptions,
+    path::PathBuf,
+    sync::{Arc, Mutex},
+};
 
 use bevy::{
     log::{
-        tracing_subscriber::{self, Registry, prelude::*},
-        LogPlugin, Level,
+        tracing_subscriber::{self, prelude::*, Registry},
+        Level, LogPlugin,
     },
-    prelude::*, utils::tracing::level_filters::LevelFilter,
+    prelude::*,
+    utils::tracing::level_filters::LevelFilter,
 };
-use crossterm::{
-    event::{DisableMouseCapture, PopKeyboardEnhancementFlags},
-    terminal::{disable_raw_mode, LeaveAlternateScreen},
-    ExecutableCommand,
-};
-use grex_dither_post_process::DitherPostProcessPlugin;
-use grex_framebuffer_extract::FramebufferExtractPlugin;
+use bevy_dither_post_process::DitherPostProcessPlugin;
+use bevy_framebuffer_extract::FramebufferExtractPlugin;
 
 pub use crossterm;
 use once_cell::sync::Lazy;
 pub use ratatui;
 
-pub mod components;
-pub mod events;
-pub mod resources;
-mod systems;
+/// Functions and types related to capture and display of world to terminal
+pub mod display;
+
+/// Functions and types related to capturing and processing user keyboard input
+pub mod input;
+
+/// Functions and types related to constructing and rendering TUI widgets
+pub mod widgets;
 
 static LOG_PATH: Lazy<Arc<Mutex<PathBuf>>> = Lazy::new(|| Arc::new(Mutex::new(PathBuf::default())));
 
+/// Plugin providing terminal display functionality
 pub struct TerminalDisplayPlugin {
+    /// Path to redirect tracing logs to. Defaults to "debug.log"
     pub log_path: PathBuf,
 }
 
 impl Default for TerminalDisplayPlugin {
     fn default() -> Self {
         Self {
-            log_path: "debug.log".into()
+            log_path: "debug.log".into(),
         }
     }
 }
 
 impl Plugin for TerminalDisplayPlugin {
     fn build(&self, app: &mut App) {
-        *LOG_PATH.lock().expect("Failed to get lock on log path mutex") = self.log_path.clone();
+        *LOG_PATH
+            .lock()
+            .expect("Failed to get lock on log path mutex") = self.log_path.clone();
         app.add_plugins((
             DitherPostProcessPlugin,
             FramebufferExtractPlugin,
@@ -50,7 +62,12 @@ impl Plugin for TerminalDisplayPlugin {
                         .write(true)
                         .create(true)
                         .truncate(true)
-                        .open(LOG_PATH.lock().expect("Failed to get lock on log path mutex").clone())
+                        .open(
+                            LOG_PATH
+                                .lock()
+                                .expect("Failed to get lock on log path mutex")
+                                .clone(),
+                        )
                         .unwrap();
                     let file_layer = tracing_subscriber::fmt::Layer::new()
                         .with_writer(log_file)
@@ -60,29 +77,23 @@ impl Plugin for TerminalDisplayPlugin {
                 ..Default::default()
             },
         ))
-        .add_systems(Startup, systems::setup)
+        .add_systems(Startup, input::systems::setup_input)
         .add_systems(
             Update,
             (
-                systems::input_handling,
-                systems::resize_handling,
-                systems::print_to_terminal,
-                systems::widget_input_handling,
+                input::systems::input_handling,
+                display::systems::resize_handling,
+                (
+                    display::systems::print_to_terminal,
+                    widgets::systems::draw_widgets,
+                )
+                    .chain(),
+                widgets::systems::widget_input_handling,
             ),
         )
-        .insert_resource(resources::Terminal::default())
-        .insert_resource(resources::EventQueue::default())
-        .insert_resource(resources::TerminalInput::default())
-        .add_event::<events::TerminalInputEvent>();
-    }
-}
-
-impl Drop for TerminalDisplayPlugin {
-    fn drop(&mut self) {
-        let mut stdout = stdout();
-        let _ = stdout.execute(PopKeyboardEnhancementFlags);
-        let _ = stdout.execute(DisableMouseCapture);
-        let _ = stdout.execute(LeaveAlternateScreen);
-        let _ = disable_raw_mode();
+        .insert_resource(display::resources::Terminal::default())
+        .insert_resource(input::resources::EventQueue::default())
+        .insert_resource(input::resources::TerminalInput::default())
+        .add_event::<input::events::TerminalInputEvent>();
     }
 }
