@@ -2,16 +2,16 @@ use bevy::{
     prelude::*,
     render::render_resource::{Extent3d, TextureFormat},
 };
-use crossterm::event::Event;
 use bevy_framebuffer_extract::{
     components::FramebufferExtractDestination, render_assets::FramebufferExtractSource,
 };
+use crossterm::event::Event;
 use ratatui::{
     style::Stylize,
     widgets::{Paragraph, Wrap},
 };
 
-use crate::input::events::TerminalInputEvent;
+use crate::{input::events::TerminalInputEvent, widgets::components::Widget};
 
 use super::resources::Terminal;
 
@@ -28,6 +28,7 @@ const BRAILLE_DOT_BIT_POSITIONS: [u8; 8] = [0, 1, 2, 6, 3, 4, 5, 7];
 pub fn print_to_terminal(
     mut terminal: ResMut<Terminal>,
     image_exports: Query<&FramebufferExtractDestination>,
+    mut widgets: Query<&mut Widget>,
 ) {
     for image_export in image_exports.iter() {
         let mut image = image_export
@@ -77,6 +78,15 @@ pub fn print_to_terminal(
                         .wrap(Wrap { trim: true }),
                     frame.size(),
                 );
+
+                let mut active_widgets = widgets
+                    .iter_mut()
+                    .filter(|widget| widget.enabled)
+                    .collect::<Vec<_>>();
+                active_widgets.sort_by(|a, b| a.depth.cmp(&b.depth));
+                for mut widget in active_widgets {
+                    widget.widget.render(frame, frame.size());
+                }
             })
             .expect("Failed to draw terminal frame");
     }

@@ -83,11 +83,7 @@ impl Plugin for TerminalDisplayPlugin {
             (
                 input::systems::input_handling,
                 display::systems::resize_handling,
-                (
-                    display::systems::print_to_terminal,
-                    widgets::systems::draw_widgets,
-                )
-                    .chain(),
+                display::systems::print_to_terminal,
                 widgets::systems::widget_input_handling,
             ),
         )
