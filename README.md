@@ -16,7 +16,7 @@ Features Include:
 - `TerminalInput` resource which keeps track of pressed & released keys
 - `Widget` component for rendering ratatui TUI widgets
 - `TerminalWidget` trait for creating custom TUI widget components
-- Logging redirected to `output.log`
+- Log redirection
 
 ## Screenshots
 ![](./doc/screenshot.png)
