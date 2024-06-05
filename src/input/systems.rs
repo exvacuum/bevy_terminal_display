@@ -34,7 +34,6 @@ pub fn input_handling(
     let mut key_events = Vec::<KeyEvent>::new();
     while let Some(event) = event_queue.pop() {
         if let Event::Key(event) = event {
-            info!("{:?}", event);
             key_events.push(event);
         }
         event_writer.send(TerminalInputEvent(event));
@@ -42,7 +41,6 @@ pub fn input_handling(
 
     key_events.sort_by(|&a, &b| a.kind.partial_cmp(&b.kind).unwrap_or(Ordering::Equal));
     for event in key_events {
-        info!("{:?}", event);
         match event.kind {
             KeyEventKind::Press => {
                 input.press(event.code);
