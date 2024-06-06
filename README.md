@@ -46,7 +46,7 @@ fn main() {
         .add_plugins((
             DefaultPlugins.build().disable::<WinitPlugin>().disable::<LogPlugin>,
             ScheduleRunnerPlugin::run_loop(Duration::from_secs_f32(1.0 / 60.0)),
-            bevy_terminal_display::TerminalDisplayPlugin,
+            bevy_terminal_display::TerminalDisplayPlugin::default(),
         ))
         .insert_resource(Msaa::Off) // For post-process
         .run();
