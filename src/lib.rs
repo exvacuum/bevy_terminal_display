@@ -10,15 +10,13 @@ use std::{
 
 use bevy::{
     log::{
-        tracing_subscriber::{self, prelude::*, Registry},
+        tracing_subscriber::{self, layer::SubscriberExt, EnvFilter, Layer, Registry},
         Level, LogPlugin,
-    },
-    prelude::*,
-    utils::tracing::level_filters::LevelFilter,
+    }, prelude::*, utils::tracing::{level_filters::LevelFilter, subscriber}
 };
 use bevy_dither_post_process::DitherPostProcessPlugin;
-use bevy_framebuffer_extract::FramebufferExtractPlugin;
 
+use bevy_headless_render::HeadlessRenderPlugin;
 pub use crossterm;
 use once_cell::sync::Lazy;
 pub use ratatui;
@@ -53,29 +51,25 @@ impl Plugin for TerminalDisplayPlugin {
         *LOG_PATH
             .lock()
             .expect("Failed to get lock on log path mutex") = self.log_path.clone();
+        let log_file = OpenOptions::new()
+            .write(true)
+            .create(true)
+            .truncate(true)
+            .open(
+                LOG_PATH
+                    .lock()
+                    .expect("Failed to get lock on log path mutex")
+                    .clone(),
+            )
+            .unwrap();
+        let file_layer = tracing_subscriber::fmt::Layer::new()
+            .with_writer(log_file)
+            .with_filter(EnvFilter::builder().parse_lossy(format!("{},{}", Level::INFO, "wgpu=error,naga=warn")));
+        let subscriber = Registry::default().with(file_layer);
+        subscriber::set_global_default(subscriber).unwrap();
         app.add_plugins((
             DitherPostProcessPlugin,
-            FramebufferExtractPlugin,
-            LogPlugin {
-                update_subscriber: Some(|_| {
-                    let log_file = OpenOptions::new()
-                        .write(true)
-                        .create(true)
-                        .truncate(true)
-                        .open(
-                            LOG_PATH
-                                .lock()
-                                .expect("Failed to get lock on log path mutex")
-                                .clone(),
-                        )
-                        .unwrap();
-                    let file_layer = tracing_subscriber::fmt::Layer::new()
-                        .with_writer(log_file)
-                        .with_filter(LevelFilter::from_level(Level::INFO));
-                    Box::new(Registry::default().with(file_layer))
-                }),
-                ..Default::default()
-            },
+            HeadlessRenderPlugin,
         ))
         .add_systems(Startup, input::systems::setup_input)
         .add_systems(

@@ -1,24 +1,17 @@
 [package]
 name = "bevy_terminal_display"
-version = "0.2.2"
+version = "0.3.0"
 edition = "2021"
+license = "0BSD OR MIT OR Apache-2.0"
+description = "A plugin for the Bevy game engine which enables rendering to a terminal using unicode braille characters."
 
 [dependencies]
-crossterm = "0.27.0"
-downcast-rs = "1.2.1"
-once_cell = "1.19.0"
-
-[dependencies.bevy]
-version = "0.13"
-
-[dependencies.bevy_framebuffer_extract]
-git = "https://github.com/exvacuum/bevy_framebuffer_extract"
-tag = "v0.1.2"
-
-[dependencies.bevy_dither_post_process]
-git = "https://github.com/exvacuum/bevy_dither_post_process"
-tag = "v0.1.4"
-
-[dependencies.ratatui]
-version = "0.26.2"
+crossbeam-channel = "0.5"
+crossterm = "0.27"
+downcast-rs = "1.2"
+once_cell = "1.19"
+bevy = "0.14"
+bevy_headless_render = "0.1"
+bevy_dither_post_process = "0.2"
+ratatui = "0.26"
 

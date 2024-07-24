@@ -1,5 +1,6 @@
 # bevy_terminal_display
 
+[![Crates](https://img.shields.io/crates/v/bevy_terminal_display)](https://crates.io/crates/bevy_terminal_display)
 ![License](https://img.shields.io/badge/license-MIT%2FApache-blue.svg)
 ![Tag](https://img.shields.io/github/v/tag/exvacuum/bevy_terminal_display)
 ![Build](https://img.shields.io/github/actions/workflow/status/exvacuum/bevy_terminal_display/rust.yml)
@@ -24,9 +25,16 @@ Features Include:
 
 | Crate Version | Bevy Version |
 |---            |---           |
+| 0.3           | 0.14         |
 | 0.2           | 0.13         |
 
 ## Installation
+
+### crates.io
+```toml
+[dependencies]
+bevy_terminal_display = "0.3"
+```
 
 ### Using git URL in Cargo.toml
 ```toml
@@ -69,5 +77,7 @@ commands.spawn((
 ));
 ```
 
+## License
 
+This crate is licensed under your choice of 0BSD, Apache-2.0, or MIT license.
 

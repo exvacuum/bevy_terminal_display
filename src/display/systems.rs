@@ -2,9 +2,7 @@ use bevy::{
     prelude::*,
     render::render_resource::{Extent3d, TextureFormat},
 };
-use bevy_framebuffer_extract::{
-    components::FramebufferExtractDestination, render_assets::FramebufferExtractSource,
-};
+use bevy_headless_render::{components::HeadlessRenderDestination, render_assets::HeadlessRenderSource};
 use crossterm::event::Event;
 use ratatui::{
     style::Stylize,
@@ -27,7 +25,7 @@ const BRAILLE_DOT_BIT_POSITIONS: [u8; 8] = [0, 1, 2, 6, 3, 4, 5, 7];
 /// Prints out the contents of a render image to the terminal as braille characters
 pub fn print_to_terminal(
     mut terminal: ResMut<Terminal>,
-    image_exports: Query<&FramebufferExtractDestination>,
+    image_exports: Query<&HeadlessRenderDestination>,
     mut widgets: Query<&mut Widget>,
 ) {
     for image_export in image_exports.iter() {
@@ -108,7 +106,7 @@ fn braille_char(mask: u8) -> char {
 /// Watches for terminal resize events and resizes the render image accordingly
 pub fn resize_handling(
     mut images: ResMut<Assets<Image>>,
-    mut sources: ResMut<Assets<FramebufferExtractSource>>,
+    mut sources: ResMut<Assets<HeadlessRenderSource>>,
     mut event_reader: EventReader<TerminalInputEvent>,
 ) {
     for event in event_reader.read() {

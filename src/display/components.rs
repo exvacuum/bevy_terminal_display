@@ -1,6 +1,6 @@
 use bevy::{prelude::*, render::render_resource::{Extent3d, TextureDescriptor, TextureDimension, TextureFormat, TextureUsages}};
 use bevy_dither_post_process::components::DitherPostProcessSettings;
-use bevy_framebuffer_extract::{components::{ExtractFramebufferBundle, FramebufferExtractDestination}, render_assets::FramebufferExtractSource};
+use bevy_headless_render::{components::{HeadlessRenderBundle, HeadlessRenderDestination}, render_assets::HeadlessRenderSource};
 
 /// Marker component for terminal display
 #[derive(Component)]
@@ -11,8 +11,8 @@ pub struct TerminalDisplay;
 #[derive(Bundle)]
 pub struct TerminalDisplayBundle {
     _terminal_display: TerminalDisplay,
-    extract_framebuffer_bundle: ExtractFramebufferBundle,
-    dither_post_process_settings: DitherPostProcessSettings,
+    _headless_render_bundle: HeadlessRenderBundle,
+    _dither_post_process_settings: DitherPostProcessSettings,
     image_handle: Handle<Image>,
 }
 
@@ -48,16 +48,16 @@ impl TerminalDisplayBundle {
         let image_handle = asset_server.add(image);
 
         let framebuffer_extract_source =
-            asset_server.add(FramebufferExtractSource(image_handle.clone()));
+            asset_server.add(HeadlessRenderSource(image_handle.clone()));
 
         Self {
             _terminal_display: TerminalDisplay,
-            extract_framebuffer_bundle: ExtractFramebufferBundle {
+            _headless_render_bundle: HeadlessRenderBundle {
                 source: framebuffer_extract_source,
-                dest: FramebufferExtractDestination::default(),
+                dest: HeadlessRenderDestination::default(),
             },
             image_handle,
-            dither_post_process_settings: DitherPostProcessSettings::new(
+            _dither_post_process_settings: DitherPostProcessSettings::new(
                 dither_level,
                 asset_server,
             ),
