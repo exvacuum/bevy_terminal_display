@@ -1,7 +1,7 @@
 # bevy_terminal_display
 
 [![Crates](https://img.shields.io/crates/v/bevy_terminal_display)](https://crates.io/crates/bevy_terminal_display)
-![License](https://img.shields.io/badge/license-MIT%2FApache-blue.svg)
+![License](https://img.shields.io/badge/license-0BSD%2FMIT%2FApache-blue.svg)
 ![Tag](https://img.shields.io/github/v/tag/exvacuum/bevy_terminal_display)
 ![Build](https://img.shields.io/github/actions/workflow/status/exvacuum/bevy_terminal_display/rust.yml)
 [![Docs](https://img.shields.io/website?url=https%3A%2F%2Fexvacuum.github.io%2Fbevy_terminal_display%2F&label=docs)](https://exvacuum.github.io/bevy_terminal_display)
