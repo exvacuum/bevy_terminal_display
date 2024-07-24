@@ -11,8 +11,8 @@ use std::{
 use bevy::{
     log::{
         tracing_subscriber::{self, layer::SubscriberExt, EnvFilter, Layer, Registry},
-        Level, LogPlugin,
-    }, prelude::*, utils::tracing::{level_filters::LevelFilter, subscriber}
+        Level,
+    }, prelude::*, utils::tracing::subscriber,
 };
 use bevy_dither_post_process::DitherPostProcessPlugin;
 
