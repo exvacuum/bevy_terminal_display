@@ -1,4 +1,4 @@
-use bevy::{prelude::*, utils::HashSet};
+use bevy::{prelude:: *, utils::HashSet};
 use crossterm::event::{Event, KeyCode};
 use std::sync::{Arc, Mutex};
 
@@ -6,7 +6,8 @@ use std::sync::{Arc, Mutex};
 #[derive(Resource, Default)]
 pub struct TerminalInput {
     pressed_keys: HashSet<KeyCode>,
-    released_keys: HashSet<KeyCode>,
+    just_pressed_keys: HashSet<KeyCode>,
+    just_released_keys: HashSet<KeyCode>,
 }
 
 impl TerminalInput {
@@ -15,31 +16,36 @@ impl TerminalInput {
         self.pressed_keys.contains(&code)
     }
 
-    /// Gets whether the given key is released
-    pub fn is_released(&self, code: KeyCode) -> bool {
-        self.released_keys.contains(&code)
+    /// Gets whether the given key was just pressed
+    pub fn just_pressed(&self, code: KeyCode) -> bool {
+        self.just_pressed_keys.contains(&code)
+    }
+
+    /// Gets whether the given key was just released
+    pub fn just_released(&self, code: KeyCode) -> bool {
+        self.just_released_keys.contains(&code)
     }
 
     /// Sets given key to pressed
     pub(super) fn press(&mut self, code: KeyCode) {
-        if !self.is_pressed(code) {
-            self.pressed_keys.insert(code);
-        }
+        self.pressed_keys.insert(code);
+        self.just_pressed_keys.insert(code);
     }
 
     /// Sets given key to released and removes pressed state
     pub(super) fn release(&mut self, code: KeyCode) {
-        if self.is_pressed(code) {
-            self.pressed_keys.remove(&code);
-        }
-        if !self.is_released(code) {
-            self.released_keys.insert(code);
-        }
+        self.pressed_keys.remove(&code);
+        self.just_released_keys.insert(code);
     }
 
-    /// Clears all released keys
-    pub(super) fn clear_released(&mut self) {
-        self.released_keys.clear();
+    /// Clears all just released keys
+    pub(super) fn clear_just_released(&mut self) {
+        self.just_released_keys.clear();
+    }
+    
+    /// Clears all just pressed keys
+    pub(super) fn clear_just_pressed(&mut self) {
+        self.just_pressed_keys.clear();
     }
 }
 

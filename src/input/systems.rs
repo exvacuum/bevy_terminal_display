@@ -29,7 +29,8 @@ pub fn input_handling(
     mut input: ResMut<TerminalInput>,
     mut event_writer: EventWriter<TerminalInputEvent>,
 ) {
-    input.clear_released();
+    input.clear_just_released();
+    input.clear_just_pressed();
     let mut event_queue = event_queue.0.lock().unwrap();
     let mut key_events = Vec::<KeyEvent>::new();
     while let Some(event) = event_queue.pop() {
