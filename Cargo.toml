@@ -1,6 +1,6 @@
 [package]
 name = "bevy_terminal_display"
-version = "0.4.1"
+version = "0.4.2"
 edition = "2021"
 license = "0BSD OR MIT OR Apache-2.0"
 description = "A plugin for the Bevy game engine which enables rendering to a terminal using unicode braille characters."
@@ -15,4 +15,5 @@ bevy = "0.14"
 bevy_headless_render = "0.1"
 bevy_dither_post_process = "0.2"
 ratatui = "0.26"
+color-eyre = "0.6"
 
