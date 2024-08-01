@@ -1,4 +1,4 @@
-use bevy::{prelude:: *, utils::HashSet};
+use bevy::{prelude::*, utils::HashSet};
 use crossterm::event::{Event, KeyCode};
 use std::sync::{Arc, Mutex};
 
@@ -28,8 +28,10 @@ impl TerminalInput {
 
     /// Sets given key to pressed
     pub(super) fn press(&mut self, code: KeyCode) {
-        self.pressed_keys.insert(code);
-        self.just_pressed_keys.insert(code);
+        if !self.pressed_keys.contains(&code) {
+            self.pressed_keys.insert(code);
+            self.just_pressed_keys.insert(code);
+        }
     }
 
     /// Sets given key to released and removes pressed state
@@ -42,7 +44,7 @@ impl TerminalInput {
     pub(super) fn clear_just_released(&mut self) {
         self.just_released_keys.clear();
     }
-    
+
     /// Clears all just pressed keys
     pub(super) fn clear_just_pressed(&mut self) {
         self.just_pressed_keys.clear();
