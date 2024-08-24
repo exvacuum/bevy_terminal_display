@@ -17,7 +17,7 @@ use bevy_dither_post_process::DitherPostProcessPlugin;
 use bevy_headless_render::HeadlessRenderPlugin;
 use color_eyre::config::HookBuilder;
 pub use crossterm;
-use crossterm::{event::{DisableMouseCapture, PopKeyboardEnhancementFlags}, terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen}, ExecutableCommand};
+use crossterm::{event::{DisableMouseCapture, PopKeyboardEnhancementFlags}, terminal::{disable_raw_mode, LeaveAlternateScreen}, ExecutableCommand};
 use once_cell::sync::Lazy;
 pub use ratatui;
 

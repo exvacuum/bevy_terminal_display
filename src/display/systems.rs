@@ -74,7 +74,7 @@ pub fn print_to_terminal(
                         .white()
                         .bold()
                         .wrap(Wrap { trim: true }),
-                    frame.size(),
+                    frame.area(),
                 );
 
                 let mut active_widgets = widgets
@@ -83,7 +83,7 @@ pub fn print_to_terminal(
                     .collect::<Vec<_>>();
                 active_widgets.sort_by(|a, b| a.depth.cmp(&b.depth));
                 for mut widget in active_widgets {
-                    widget.widget.render(frame, frame.size());
+                    widget.widget.render(frame, frame.area());
                 }
             })
             .expect("Failed to draw terminal frame");
