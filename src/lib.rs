@@ -3,7 +3,7 @@
 //! Bevy plugin which allows a camera to render to a terminal window.
 
 use std::{
-    fs::OpenOptions, io::stdout, path::PathBuf, sync::{Arc, Mutex}
+    fs::OpenOptions, io::{stdout, Write}, path::PathBuf, sync::{Arc, Mutex}
 };
 
 use bevy::{
@@ -79,6 +79,7 @@ impl Plugin for TerminalDisplayPlugin {
 
         std::panic::set_hook(Box::new(move |info| {
             let _ = restore_terminal();
+            error!("{info}");
             panic(info);
         }));
         
@@ -94,19 +95,21 @@ impl Plugin for TerminalDisplayPlugin {
                 display::systems::resize_handling,
                 display::systems::print_to_terminal,
                 widgets::systems::widget_input_handling,
+                widgets::systems::update_widgets,
             ),
         )
         .insert_resource(display::resources::Terminal::default())
         .insert_resource(input::resources::EventQueue::default())
-        .insert_resource(input::resources::TerminalInput::default())
         .add_event::<input::events::TerminalInputEvent>();
     }
 }
 
-fn restore_terminal() {
+fn restore_terminal() -> Result<(), Box<dyn std::error::Error>>{
+    disable_raw_mode()?;
     let mut stdout = stdout();
-    let _ = stdout.execute(PopKeyboardEnhancementFlags);
-    let _ = stdout.execute(DisableMouseCapture);
-    let _ = stdout.execute(LeaveAlternateScreen);
-    let _ = disable_raw_mode();
+    stdout.execute(PopKeyboardEnhancementFlags)?
+        .execute(DisableMouseCapture)?
+        .execute(LeaveAlternateScreen)?
+        .flush()?;
+    Ok(())
 }
