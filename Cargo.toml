@@ -18,6 +18,7 @@ smol_str = "0.2"
 
 [dependencies.bevy_headless_render]
 git = "https://github.com/exvacuum/bevy_headless_render"
+branch = "wip"
 
 [dependencies.bevy_dither_post_process]
 git = "https://github.com/exvacuum/bevy_dither_post_process"
