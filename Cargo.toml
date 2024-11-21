@@ -10,12 +10,14 @@ repository = "https://github.com/exvacuum/bevy_terminal_display"
 crossbeam-channel = "0.5"
 downcast-rs = "1.2"
 once_cell = "1.19"
-bevy_headless_render = "0.1"
 ratatui = "0.28"
 color-eyre = "0.6"
 leafwing-input-manager = "0.15"
 serde = "1.0"
 smol_str = "0.2"
+
+[dependencies.bevy_headless_render]
+git = "https://github.com/exvacuum/bevy_headless_render"
 
 [dependencies.bevy_dither_post_process]
 git = "https://github.com/exvacuum/bevy_dither_post_process"
