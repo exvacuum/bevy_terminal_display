@@ -965,7 +965,7 @@ dependencies = [
 
 [[package]]
 name = "bevy_terminal_display"
-version = "0.5.1"
+version = "0.6.0"
 dependencies = [
  "bevy",
  "bevy_dither_post_process",
