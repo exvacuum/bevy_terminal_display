@@ -72,7 +72,6 @@ pub fn print_to_terminal(
                 frame.render_widget(
                     Paragraph::new(string)
                         .white()
-                        .bold()
                         .wrap(Wrap { trim: true }),
                     frame.area(),
                 );

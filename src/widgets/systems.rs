@@ -16,3 +16,9 @@ pub fn widget_input_handling(
         }
     }
 }
+
+pub fn update_widgets(mut widgets: Query<&mut Widget>, time: Res<Time>, mut commands: Commands) {
+    for mut widget in widgets.iter_mut() {
+        widget.widget.update(&time, &mut commands);
+    }
+}

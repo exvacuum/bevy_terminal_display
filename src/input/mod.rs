@@ -6,3 +6,6 @@ pub mod resources;
 
 /// Systems for this module
 pub(crate) mod systems;
+
+/// Components for this module
+pub(crate) mod components;

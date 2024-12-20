@@ -17,5 +17,8 @@ pub trait TerminalWidget: DowncastSync {
 
     /// Called when a terminal input event is invoked to update any state accordingly
     fn handle_events(&mut self, _event: &TerminalInputEvent, _commands: &mut Commands) {}
+
+    /// Called every frame during the Update schedule
+    fn update(&mut self, _time: &Time, _commands: &mut Commands) {}
 }
 impl_downcast!(sync TerminalWidget);
