@@ -54,13 +54,22 @@ pub fn input_handling(
         if let Some(key_code) = crossterm_keycode_to_bevy_keycode(event.code) {
             if let Some(logical_key) = crossterm_keycode_to_bevy_key(event.code) {
                 match event.kind {
-                    KeyEventKind::Press | KeyEventKind::Repeat => {
-                        // input.press(event.code);
+                    KeyEventKind::Press => {
                         key_event_writer.send(KeyboardInput {
                             key_code,
                             logical_key,
                             state: ButtonState::Pressed,
                             window,
+                            repeat: false,
+                        });
+                    }
+                    KeyEventKind::Repeat => {
+                        key_event_writer.send(KeyboardInput {
+                            key_code,
+                            logical_key,
+                            state: ButtonState::Pressed,
+                            window,
+                            repeat: true,
                         });
                     }
                     KeyEventKind::Release => {
@@ -69,6 +78,7 @@ pub fn input_handling(
                             logical_key,
                             state: ButtonState::Released,
                             window,
+                            repeat: false,
                         });
                     }
                 }
